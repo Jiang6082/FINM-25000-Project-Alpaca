@@ -169,16 +169,15 @@ July 10, 2026:
 - `artifacts/alpaca_run/trades.csv`: backtest trade/P&L log
 - `artifacts/alpaca_run/paper_order_evidence.md`: non-sensitive paper order status note
 - `artifacts/alpaca_run/paper_order_status.csv`: non-sensitive paper order status table
+- `artifacts/alpaca_run/paper_positions_snapshot.csv`: non-sensitive paper position snapshot
 
 The paper order was submitted through an Alpaca `TradingClient` constructed
-with `paper=True`. Because it was submitted before the regular market open,
-the order was accepted by the paper endpoint but had not filled at the time of
-the status check.
+with `paper=True`. The order filled in the Alpaca paper account during regular
+market hours.
 
 ## What Still Requires Human Work
 
-- Confirm the submitted paper order in the Alpaca paper dashboard after market open, or rerun `paper-once` during market hours.
-- Save dashboard screenshots showing the paper account and order/trade state.
+- Save dashboard screenshots showing the paper account and filled order/trade state.
 - Record the required 10-15 minute video walkthrough.
 - In the video, say clearly: **"This is paper trading only. No real money is used."**
 - Add the final video link here before Canvas submission:

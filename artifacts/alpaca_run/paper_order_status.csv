@@ -1,2 +1,2 @@
-checked_at,order_id,symbol,side,qty,type,time_in_force,status,submitted_at,filled_at,filled_qty
-2026-07-10T08:33:20,79aef2fa-cd4a-4522-bb49-3dbaf6eab405,AAPL,OrderSide.BUY,1,OrderType.MARKET,TimeInForce.DAY,OrderStatus.NEW,2026-07-10 12:33:01.209713+00:00,None,0
+checked_at,market_is_open,clock_timestamp,order_id,symbol,side,qty,type,time_in_force,status,submitted_at,filled_at,filled_qty,filled_avg_price
+2026-07-10T10:15:19,True,2026-07-10 10:15:19.031649-04:00,79aef2fa-cd4a-4522-bb49-3dbaf6eab405,AAPL,OrderSide.BUY,1,OrderType.MARKET,TimeInForce.DAY,OrderStatus.FILLED,2026-07-10 12:33:01.209713+00:00,2026-07-10 13:30:10.221400+00:00,1,314.61
