@@ -31,14 +31,20 @@ def target_orders(
     cash: float,
     config: RiskConfig,
 ) -> list[dict]:
-    """Translate desired signals into risk-checked target orders."""
+    """Translate desired signals into risk-checked target orders.
+
+    Exits are generated first: a position is closed when it drops out of the
+    signal ranking or hits its stop-loss/take-profit level. New entries are
+    then sized so that total exposure (positions kept open plus new buys)
+    stays within ``max_total_notional``, and never exceeds available cash
+    unless leverage is explicitly allowed. The system is structurally
+    long-only: sells only ever close existing long positions.
+    """
     orders: list[dict] = []
     active_signals = latest_signal[latest_signal["signal"] == 1].sort_values("score", ascending=False)
-    max_positions = min(config.max_open_positions, len(active_signals))
-    max_total = min(config.max_total_notional, cash if not config.allow_leverage else config.max_total_notional)
-    per_position = min(config.max_position_notional, max_total / max(max_positions, 1))
-    desired = set(active_signals.head(max_positions)["symbol"])
+    desired = set(active_signals.head(config.max_open_positions)["symbol"])
 
+    exited: set[str] = set()
     for symbol, position in positions.items():
         if (
             symbol not in desired
@@ -46,21 +52,32 @@ def target_orders(
             or position.unrealized_return >= config.take_profit_pct
         ):
             orders.append({"symbol": symbol, "side": "sell", "quantity": position.quantity, "reason": "exit"})
+            exited.add(symbol)
 
-    open_after_exits = {symbol for symbol in positions if symbol in desired}
-    for _, row in active_signals.iterrows():
-        symbol = row["symbol"]
-        if symbol in open_after_exits:
-            continue
-        if len(open_after_exits) >= config.max_open_positions:
-            continue
+    held = {symbol: position for symbol, position in positions.items() if symbol not in exited}
+    held_exposure = sum(position.notional for position in held.values())
+    total_budget = max(config.max_total_notional - held_exposure, 0.0)
+    if not config.allow_leverage:
+        total_budget = min(total_budget, max(cash, 0.0))
+
+    # Symbols exited this cycle (e.g. on stop-loss) are not re-entered in the
+    # same cycle; they become eligible again on the next evaluation.
+    slots = max(config.max_open_positions - len(held), 0)
+    candidates = [
+        row
+        for _, row in active_signals.iterrows()
+        if row["symbol"] not in held and row["symbol"] not in exited
+    ][:slots]
+    if not candidates or total_budget <= 0:
+        return orders
+
+    per_position = min(config.max_position_notional, total_budget / len(candidates))
+    remaining_budget = total_budget
+    for row in candidates:
         price = float(row["close"])
-        quantity = int(per_position // price)
+        quantity = int(min(per_position, remaining_budget) // price)
         if quantity <= 0:
             continue
-        orders.append({"symbol": symbol, "side": "buy", "quantity": quantity, "reason": "entry"})
-        open_after_exits.add(symbol)
-
-    if not config.allow_short:
-        orders = [order for order in orders if order["side"] in {"buy", "sell"} and order["quantity"] > 0]
+        orders.append({"symbol": row["symbol"], "side": "buy", "quantity": quantity, "reason": "entry"})
+        remaining_budget -= quantity * price
     return orders

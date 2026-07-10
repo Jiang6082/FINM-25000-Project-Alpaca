@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+import logging
 import os
 from pathlib import Path
+import time
 
 import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 
+
+log = logging.getLogger(__name__)
 
 BAR_COLUMNS = ["timestamp", "symbol", "open", "high", "low", "close", "volume"]
 
@@ -49,7 +53,10 @@ class AlpacaMarketData:
 
         frame = TimeFrame.Day if timeframe == "day" else TimeFrame.Minute
         end = datetime.now(timezone.utc)
-        start = end - timedelta(days=max(lookback_days + 10, 30))
+        if timeframe == "day":
+            start = end - timedelta(days=max(lookback_days + 10, 30))
+        else:
+            start = end - timedelta(days=max(lookback_days, 1))
         request = StockBarsRequest(
             symbol_or_symbols=symbols,
             timeframe=frame,
@@ -57,11 +64,25 @@ class AlpacaMarketData:
             end=end,
             feed=self.feed,
         )
-        bars = self.client.get_stock_bars(request).df
+        bars = self._fetch_with_retry(request).df
         if bars.empty:
             return pd.DataFrame(columns=BAR_COLUMNS)
-        bars = bars.reset_index().rename(columns={"timestamp": "timestamp"})
+        bars = bars.reset_index()
         return bars[BAR_COLUMNS].sort_values(["symbol", "timestamp"]).reset_index(drop=True)
+
+    def _fetch_with_retry(self, request, attempts: int = 3, backoff_seconds: float = 2.0):
+        last_error: Exception | None = None
+        for attempt in range(1, attempts + 1):
+            try:
+                return self.client.get_stock_bars(request)
+            except Exception as exc:
+                last_error = exc
+                log.warning("Market data fetch failed (attempt %s/%s): %s", attempt, attempts, exc)
+                if attempt < attempts:
+                    time.sleep(backoff_seconds * attempt)
+        raise RuntimeError(
+            f"Failed to fetch bars from Alpaca after {attempts} attempts: {last_error}"
+        ) from last_error
 
 
 class SimulatedMarketData:
@@ -100,10 +121,21 @@ class SimulatedMarketData:
 
 
 def append_bar_log(bars: pd.DataFrame, data_dir: Path) -> Path:
+    """Append bars to today's log file, de-duplicated on (timestamp, symbol)."""
     data_dir.mkdir(parents=True, exist_ok=True)
-    path = data_dir / f"bars_{pd.Timestamp.utcnow().date()}.csv"
-    write_header = not path.exists()
-    bars.to_csv(path, mode="a", header=write_header, index=False)
+    path = data_dir / f"bars_{pd.Timestamp.now(tz='UTC').date()}.csv"
+    combined = bars.copy()
+    if path.exists():
+        existing = pd.read_csv(path)
+        combined = pd.concat([existing, combined], ignore_index=True)
+    combined["timestamp"] = pd.to_datetime(combined["timestamp"], utc=True)
+    combined = (
+        combined.drop_duplicates(subset=["timestamp", "symbol"], keep="last")
+        .sort_values(["symbol", "timestamp"])
+        .reset_index(drop=True)
+    )
+    combined.to_csv(path, index=False)
+    log.info("Logged %s bars (%s total today) to %s", len(bars), len(combined), path)
     return path
 
 
