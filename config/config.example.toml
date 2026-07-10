@@ -1,0 +1,31 @@
+[system]
+mode = "backtest"
+paper_trading_only = true
+log_dir = "logs"
+data_dir = "data/live"
+
+[universe]
+tickers = ["AAPL", "MSFT", "SPY", "QQQ", "NVDA"]
+
+[strategy]
+name = "moving_average_breakout"
+fast_window = 10
+slow_window = 30
+breakout_window = 20
+volatility_window = 20
+max_symbols = 3
+
+[risk]
+initial_capital = 100000
+max_position_notional = 15000
+max_total_notional = 45000
+max_open_positions = 3
+stop_loss_pct = 0.05
+take_profit_pct = 0.10
+allow_short = false
+allow_leverage = false
+
+[execution]
+order_type = "market"
+time_in_force = "day"
+dry_run_default = true
