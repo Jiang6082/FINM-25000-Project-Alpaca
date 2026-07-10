@@ -4,6 +4,13 @@ An Alpaca-based systematic trading system for paper trading only. The system inc
 
 Repository: <https://github.com/Jiang6082/FINM-25000-Project-Alpaca>
 
+Video walkthrough (YouTube, unlisted): <https://www.youtube.com/watch?v=mQLmHRJsTh8>
+
+## Team
+
+- Charles Jiang ([@Jiang6082](https://github.com/Jiang6082))
+- Peirui Liu
+
 ## Safety
 
 This project is built for **Alpaca paper trading only**. It does not require or use real-money trading. API keys are loaded from `.env`, which is excluded from GitHub.
@@ -23,7 +30,7 @@ alpaca_trading_system/
   engine.py             orchestration for backtest and paper runs
   cli.py                command-line entry points
   ui/streamlit_app.py   monitoring and control dashboard
-tests/                  unit tests for strategy, risk, backtest
+tests/                  unit tests for strategy, risk, backtest, execution
 artifacts/sample/       sample backtest outputs from simulated data
 ```
 
@@ -65,6 +72,7 @@ artifacts/sample/       sample backtest outputs from simulated data
 The strategy is a systematic moving-average breakout model:
 
 - Go long when the fast moving average is above the slow moving average.
+- Require the close to break above the prior `breakout_window`-day high.
 - Require positive recent momentum versus the breakout lookback.
 - Rank candidates by momentum divided by realized volatility.
 - Hold at most `max_symbols` names.
@@ -106,11 +114,22 @@ The market behavior assumption is that large liquid equities and ETFs can show s
 
 Requires Python 3.11+ (the config loader uses `tomllib`).
 
+macOS / Linux:
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
+```
+
+Windows (PowerShell):
+
+```powershell
+py -3.13 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+copy .env.example .env
 ```
 
 For Alpaca paper mode, fill `.env` with paper API credentials:
@@ -295,12 +314,16 @@ Video (YouTube, unlisted): <https://www.youtube.com/watch?v=mQLmHRJsTh8>
 The video states the paper-trading disclaimer on screen at the start and end:
 **"This is paper trading only. No real money is used."**
 
-## Video Outline
+The video covers:
 
-1. Project goal and paper-trading safety statement.
-2. Architecture: data, strategy, risk, execution, UI.
-3. Run the Streamlit dashboard.
-4. Show backtest metrics, equity curve, drawdown, signals, and orders.
-5. Run paper-trading demo in Alpaca paper mode.
-6. Show Alpaca dashboard order/trade evidence.
-7. Discuss limitations: simulated sample data, simple rule-based strategy, no transaction-cost model beyond basic assumptions, and need for robust production monitoring.
+1. Project goal and architecture (data, strategy, risk, execution, UI).
+2. The test suite passing (9 tests).
+3. A backtest on real Alpaca historical data with metrics, equity curve, and
+   drawdown charts.
+4. The live data pipeline logging quotes to `data/live/`.
+5. The Streamlit dashboard: connection status, paper-account positions and
+   P&L, backtest results, and the dry-run / live strategy cycle controls.
+6. Live paper-trading execution: orders submitted to the Alpaca paper
+   endpoint, polled to `filled`, and verified in the Alpaca dashboard.
+7. The structured event log and a reflection on limitations, improvements,
+   and lessons learned.
