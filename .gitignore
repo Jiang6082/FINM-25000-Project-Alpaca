@@ -8,3 +8,4 @@ logs/*.log
 data/live/*.csv
 artifacts/backtests/
 artifacts/paper_demo/
+demo/
