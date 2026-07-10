@@ -101,6 +101,13 @@ python -m alpaca_trading_system.cli --config config/config.example.toml paper-on
 
 The paper run fetches recent Alpaca bars, generates signals, checks risk limits, and submits market orders through Alpaca's paper endpoint.
 
+For a small paper-demo order, use the demo config. It limits the universe to
+`AAPL`, uses shorter signal windows, and caps notional exposure at `$500`:
+
+```bash
+python -m alpaca_trading_system.cli --config config/paper_demo.example.toml paper-once
+```
+
 ## Run Data Collection
 
 ```bash
@@ -149,11 +156,29 @@ Verified locally:
 
 `artifacts/sample/` contains a sample simulated backtest so the repo has visible output artifacts even before live Alpaca credentials are added.
 
+## Alpaca Paper Run Evidence
+
+After adding local paper credentials, the Alpaca-backed paths were run on
+July 10, 2026:
+
+- `artifacts/alpaca_run/latest_bars_snapshot.csv`: latest Alpaca market-data snapshot for AAPL, MSFT, NVDA, QQQ, and SPY
+- `artifacts/alpaca_run/metrics.csv`: Alpaca-data backtest metrics
+- `artifacts/alpaca_run/equity_curve.png`: Alpaca-data equity curve
+- `artifacts/alpaca_run/drawdown.png`: Alpaca-data drawdown chart
+- `artifacts/alpaca_run/orders.csv`: backtest order log
+- `artifacts/alpaca_run/trades.csv`: backtest trade/P&L log
+- `artifacts/alpaca_run/paper_order_evidence.md`: non-sensitive paper order status note
+- `artifacts/alpaca_run/paper_order_status.csv`: non-sensitive paper order status table
+
+The paper order was submitted through an Alpaca `TradingClient` constructed
+with `paper=True`. Because it was submitted before the regular market open,
+the order was accepted by the paper endpoint but had not filled at the time of
+the status check.
+
 ## What Still Requires Human Work
 
-- Add real Alpaca paper API credentials locally in `.env`.
-- Run `paper-once` during market hours and confirm an order in the Alpaca paper dashboard.
-- Save screenshots or logs showing the paper dashboard and order state.
+- Confirm the submitted paper order in the Alpaca paper dashboard after market open, or rerun `paper-once` during market hours.
+- Save dashboard screenshots showing the paper account and order/trade state.
 - Record the required 10-15 minute video walkthrough.
 - In the video, say clearly: **"This is paper trading only. No real money is used."**
 - Add the final video link here before Canvas submission:

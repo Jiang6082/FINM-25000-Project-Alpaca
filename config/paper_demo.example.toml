@@ -1,0 +1,31 @@
+[system]
+mode = "paper"
+paper_trading_only = true
+log_dir = "logs"
+data_dir = "data/live"
+
+[universe]
+tickers = ["AAPL"]
+
+[strategy]
+name = "moving_average_breakout_demo"
+fast_window = 5
+slow_window = 10
+breakout_window = 5
+volatility_window = 10
+max_symbols = 1
+
+[risk]
+initial_capital = 100000
+max_position_notional = 500
+max_total_notional = 500
+max_open_positions = 1
+stop_loss_pct = 0.05
+take_profit_pct = 0.10
+allow_short = false
+allow_leverage = false
+
+[execution]
+order_type = "market"
+time_in_force = "day"
+dry_run_default = false
