@@ -288,15 +288,12 @@ The paper order was submitted through an Alpaca `TradingClient` constructed
 with `paper=True`. The order filled in the Alpaca paper account during regular
 market hours.
 
-## What Still Requires Human Work
+## Video Walkthrough
 
-- Record the required 10-15 minute video walkthrough.
-- In the video, say clearly: **"This is paper trading only. No real money is used."**
-- Add the final video link here before Canvas submission:
+Video (YouTube, unlisted): <https://www.youtube.com/watch?v=mQLmHRJsTh8>
 
-```text
-VIDEO LINK: TODO
-```
+The video states the paper-trading disclaimer on screen at the start and end:
+**"This is paper trading only. No real money is used."**
 
 ## Video Outline
 
