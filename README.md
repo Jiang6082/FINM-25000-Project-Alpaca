@@ -327,6 +327,3 @@ The video covers:
    endpoint, polled to `filled`, and verified in the Alpaca dashboard.
 7. The structured event log and a reflection on limitations, improvements,
    and lessons learned.
-
-For a chunk-by-chunk recording script with terminal commands and voiceover text,
-see `docs/video_script.md`.
