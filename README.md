@@ -4,7 +4,7 @@ An Alpaca-based systematic trading system for paper trading only. The system inc
 
 Repository: <https://github.com/Jiang6082/FINM-25000-Project-Alpaca>
 
-Video walkthrough (YouTube, unlisted): <https://www.youtube.com/watch?v=mQLmHRJsTh8>
+Video walkthrough (YouTube, unlisted): <https://youtu.be/fhPcpMOMTTI>
 
 ## Team
 
@@ -309,7 +309,7 @@ market hours.
 
 ## Video Walkthrough
 
-Video (YouTube, unlisted): <https://www.youtube.com/watch?v=mQLmHRJsTh8>
+Video (YouTube, unlisted): <https://youtu.be/fhPcpMOMTTI>
 
 The video states the paper-trading disclaimer on screen at the start and end:
 **"This is paper trading only. No real money is used."**
